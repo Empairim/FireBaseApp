@@ -6,19 +6,28 @@ import { collection, onSnapshot, orderBy, query } from "@firebase/firestore";
 import Link from "next/link";
 
 export default function Home() {
-  //Create a state with all the post
+  // Create a state to hold all posts
   const [allPost, setAllPosts] = useState([]);
 
-  //this constantly searching for chnages to update
+  // Function to fetch and update posts from Firestore
   const getPost = async () => {
+    // Reference to the "posts" collection
     const collectionRef = collection(db, "posts");
+
+    // Create a query with ordering by timestamp in descending order
     const q = query(collectionRef, orderBy("timestamp", "desc"));
+
+    // Set up a snapshot listener to get real-time updates
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      // Update the state with the latest posts
       setAllPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     });
+
+    // Return the unsubscribe function to stop listening when component unmounts
     return unsubscribe;
   };
 
+  // useEffect hook to fetch posts when the component mounts
   useEffect(() => {
     getPost();
   }, []);
@@ -34,8 +43,11 @@ export default function Home() {
 
       <div className="h-screen items-center justify-center my-12 text-lg font-medium">
         <h2>See what everyone is up to</h2>
+
+        {/* Display each post using the Message component */}
         {allPost.map((post) => (
           <Message key={post.id} {...post}>
+            {/* Link to the individual post page */}
             <Link href={{ pathname: `/${post.id}`, query: { ...post } }}>
               <button className=" bg-teal-400 p-2 rounded-md shadow-md shadow-black">
                 {post.comments?.length > 0 ? post.comments?.length : 0} Comments

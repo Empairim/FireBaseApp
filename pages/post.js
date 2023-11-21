@@ -10,6 +10,7 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
+//build in stuff from firebase
 import { toast } from "react-toastify";
 
 export default function Post() {
@@ -35,6 +36,7 @@ export default function Post() {
 
       return;
     }
+    //user ffeedback ui to put something in desc
     if (post.description.length > 300) {
       toast.error("Description too long 😅 ", {
         position: toast.POSITION.TOP_CENTER,
@@ -44,10 +46,13 @@ export default function Post() {
       return;
     }
 
+    //checking if post has id if it does its an update to a post
     if (post?.hasOwnProperty("id")) {
       const docRef = doc(db, "posts", post.id);
       const updatedPost = { ...post, timestamp: serverTimestamp() };
       await updateDoc(docRef, updatedPost);
+      console.log("Post created:", post);
+      // for post to work must set up firetore database and change the read write access so it only allows it if user is authenticated it will not redirect even if the post goes through and is on the main page it will ONLY work if it gets feed back that its saved to the database.
       return route.push("/");
     } else {
       //Make a new post
@@ -60,10 +65,14 @@ export default function Post() {
         username: user.displayName,
       });
       setPost({ description: "" });
+      //clears post after success
+      //toast is just user feedback ui
       toast.success("Post has been made 👍", {
         position: toast.POSITION.TOP_CENTER,
         autoClose: 1500,
       });
+
+      console.log("Post created:", post);
 
       return route.push("/");
     }
